@@ -1,0 +1,534 @@
+[
+    {
+        "id": "b6ec9e4fcfb73207",
+        "type": "tab",
+        "label": "Controle",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "1d670ee089d75172",
+        "type": "tab",
+        "label": "Flow 1",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "803e46c0722e018f",
+        "type": "tab",
+        "label": "Dashboard",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "1006fe7d5b57017a",
+        "type": "ui-base",
+        "name": "My Dashboard",
+        "path": "/dashboard",
+        "appIcon": "",
+        "includeClientData": true,
+        "acceptsClientConfig": [
+            "ui-notification",
+            "ui-control"
+        ],
+        "showPathInSidebar": false,
+        "headerContent": "page",
+        "navigationStyle": "default",
+        "titleBarStyle": "default",
+        "showReconnectNotification": true,
+        "notificationDisplayTime": 1,
+        "showDisconnectNotification": true,
+        "allowInstall": false
+    },
+    {
+        "id": "24cb333788d40170",
+        "type": "ui-theme",
+        "name": "Default Theme",
+        "colors": {
+            "surface": "#ffffff",
+            "primary": "#0094CE",
+            "bgPage": "#eeeeee",
+            "groupBg": "#ffffff",
+            "groupOutline": "#cccccc"
+        },
+        "sizes": {
+            "density": "default",
+            "pagePadding": "12px",
+            "groupGap": "12px",
+            "groupBorderRadius": "4px",
+            "widgetGap": "12px"
+        }
+    },
+    {
+        "id": "62992caeb995f3aa",
+        "type": "ui-page",
+        "name": "Page 1",
+        "ui": "1006fe7d5b57017a",
+        "path": "/page1",
+        "icon": "home",
+        "layout": "grid",
+        "theme": "24cb333788d40170",
+        "breakpoints": [
+            {
+                "name": "Default",
+                "px": 0,
+                "cols": 3
+            },
+            {
+                "name": "Tablet",
+                "px": 576,
+                "cols": 6
+            },
+            {
+                "name": "Small Desktop",
+                "px": 768,
+                "cols": 9
+            },
+            {
+                "name": "Desktop",
+                "px": 1024,
+                "cols": 12
+            }
+        ],
+        "order": 1,
+        "className": "",
+        "visible": true,
+        "disabled": "false"
+    },
+    {
+        "id": "c92eb03e21b57652",
+        "type": "ui-group",
+        "name": "Group 1",
+        "page": "62992caeb995f3aa",
+        "width": 6,
+        "height": 1,
+        "order": 1,
+        "showTitle": true,
+        "className": "",
+        "visible": true,
+        "disabled": false,
+        "groupType": "default"
+    },
+    {
+        "id": "032ce5adddc01a71",
+        "type": "inject",
+        "z": "b6ec9e4fcfb73207",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "temperatura",
+        "payload": "{\"temperatura\": 50}",
+        "payloadType": "str",
+        "x": 230,
+        "y": 260,
+        "wires": [
+            [
+                "a908505246b1a090",
+                "2f54dd27b91c91cb"
+            ]
+        ]
+    },
+    {
+        "id": "a908505246b1a090",
+        "type": "debug",
+        "z": "b6ec9e4fcfb73207",
+        "name": "Valor entrada temperatura",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 610,
+        "y": 260,
+        "wires": []
+    },
+    {
+        "id": "2f54dd27b91c91cb",
+        "type": "function",
+        "z": "b6ec9e4fcfb73207",
+        "name": "Validar temperatura",
+        "func": "let roomState = 0\nlet ligarVentilador = false\nif (msg.payload) {\n    let dados = JSON.parse(msg.payload);\n    let temperatura = parseFloat(dados.temperatura)\n    if (temperatura >= 50) {\n        roomState = 2\n    }\n    else {\n        if (temperatura > 25) {\n            roomState = 1\n            ligarVentilador = true\n        }else{\n            roomState = 0\n            ligarVentilador = false\n        }\n    }\n\n    msg.roomState  = roomState;\n    msg.payload = JSON.stringify({...dados, roomState, ligarVentilador, temperatura});\n}\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 570,
+        "y": 60,
+        "wires": [
+            [
+                "83610fd237729bfe"
+            ]
+        ]
+    },
+    {
+        "id": "4e8ffe5d715dfb3f",
+        "type": "mqtt in",
+        "z": "b6ec9e4fcfb73207",
+        "name": "",
+        "topic": "temperatura",
+        "qos": "2",
+        "datatype": "auto-detect",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 150,
+        "y": 60,
+        "wires": [
+            [
+                "2f54dd27b91c91cb"
+            ]
+        ]
+    },
+    {
+        "id": "83610fd237729bfe",
+        "type": "switch",
+        "z": "b6ec9e4fcfb73207",
+        "name": "",
+        "property": "roomState",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "lt",
+                "v": "2",
+                "vt": "num"
+            },
+            {
+                "t": "eq",
+                "v": "2",
+                "vt": "num"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 2,
+        "x": 790,
+        "y": 60,
+        "wires": [
+            [
+                "938d8d6bbf83e0e0",
+                "ae4707c3860b586c",
+                "a00f60b6aebc8abf"
+            ],
+            [
+                "2d5a0072794909d7",
+                "12c812b72604187d",
+                "ae4707c3860b586c",
+                "a00f60b6aebc8abf"
+            ]
+        ]
+    },
+    {
+        "id": "938d8d6bbf83e0e0",
+        "type": "debug",
+        "z": "b6ec9e4fcfb73207",
+        "name": "Retorno controle ventilador",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1060,
+        "y": 40,
+        "wires": []
+    },
+    {
+        "id": "2d5a0072794909d7",
+        "type": "debug",
+        "z": "b6ec9e4fcfb73207",
+        "name": "Incendio",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1080,
+        "y": 460,
+        "wires": []
+    },
+    {
+        "id": "ae4707c3860b586c",
+        "type": "mqtt out",
+        "z": "b6ec9e4fcfb73207",
+        "name": "LigarVentilador",
+        "topic": "ventilador",
+        "qos": "1",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "",
+        "x": 1120,
+        "y": 160,
+        "wires": []
+    },
+    {
+        "id": "12c812b72604187d",
+        "type": "mqtt out",
+        "z": "b6ec9e4fcfb73207",
+        "name": "AlarmeIncendio",
+        "topic": "alarme",
+        "qos": "2",
+        "retain": "true",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "",
+        "x": 1100,
+        "y": 400,
+        "wires": []
+    },
+    {
+        "id": "a00f60b6aebc8abf",
+        "type": "function",
+        "z": "b6ec9e4fcfb73207",
+        "name": "Formatar para status",
+        "func": "let dados = JSON.parse(msg.payload);\n\nmsg.payload = JSON.stringify({temperatura: dados.temperatura, roomState: dados.roomState, ligarVentilador: dados.ligarVentilador});\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1400,
+        "y": 100,
+        "wires": [
+            [
+                "b17f66b759e3033f"
+            ]
+        ]
+    },
+    {
+        "id": "b17f66b759e3033f",
+        "type": "mqtt out",
+        "z": "b6ec9e4fcfb73207",
+        "name": "Publicar status",
+        "topic": "status",
+        "qos": "2",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "",
+        "x": 1700,
+        "y": 100,
+        "wires": []
+    },
+    {
+        "id": "chart_temp",
+        "type": "ui-chart",
+        "z": "803e46c0722e018f",
+        "group": "c92eb03e21b57652",
+        "name": "Temperatura",
+        "label": "Temperatura (°C)",
+        "order": 1,
+        "chartType": "line",
+        "category": "",
+        "categoryType": "none",
+        "xAxisLabel": "",
+        "xAxisProperty": "",
+        "xAxisPropertyType": "timestamp",
+        "xAxisType": "time",
+        "xAxisFormat": "",
+        "xAxisFormatType": "auto",
+        "xmin": "",
+        "xmax": "",
+        "yAxisLabel": "",
+        "yAxisProperty": "temperatura",
+        "yAxisPropertyType": "property",
+        "ymin": "0",
+        "ymax": "100",
+        "bins": "",
+        "stackSeries": false,
+        "pointRadius": "",
+        "showLegend": true,
+        "removeOlder": "1",
+        "removeOlderUnit": "3600",
+        "removeOlderPoints": "",
+        "colors": [
+            "#0094ce",
+            "#000000",
+            "#000000",
+            "#000000",
+            "#000000",
+            "#000000",
+            "#000000",
+            "#000000",
+            "#000000"
+        ],
+        "textColor": [
+            "#666666"
+        ],
+        "textColorDefault": true,
+        "gridColor": [
+            "#e5e5e5"
+        ],
+        "gridColorDefault": true,
+        "width": 6,
+        "height": 4,
+        "className": "",
+        "interpolation": "linear",
+        "x": 830,
+        "y": 80,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "chart_estado",
+        "type": "ui-chart",
+        "z": "803e46c0722e018f",
+        "group": "c92eb03e21b57652",
+        "name": "Estado Sala",
+        "label": "Estado (0=OK,1=Vent,2=Fogo)",
+        "order": 2,
+        "chartType": "line",
+        "category": "",
+        "categoryType": "none",
+        "xAxisLabel": "",
+        "xAxisProperty": "",
+        "xAxisPropertyType": "timestamp",
+        "xAxisType": "time",
+        "xAxisFormat": "",
+        "xAxisFormatType": "auto",
+        "xmin": "",
+        "xmax": "",
+        "yAxisLabel": "",
+        "yAxisProperty": "roomState",
+        "yAxisPropertyType": "property",
+        "ymin": "0",
+        "ymax": "2",
+        "bins": "",
+        "stackSeries": false,
+        "pointRadius": "",
+        "showLegend": true,
+        "removeOlder": "1",
+        "removeOlderUnit": "3600",
+        "removeOlderPoints": "",
+        "colors": [
+            "#1f77b4",
+            "#aec7e8",
+            "#ff7f0e",
+            "#2ca02c",
+            "#98df8a",
+            "#d62728",
+            "#ff9896",
+            "#9467bd",
+            "#c5b0d5"
+        ],
+        "textColor": [
+            "#666666"
+        ],
+        "textColorDefault": true,
+        "gridColor": [
+            "#e5e5e5"
+        ],
+        "gridColorDefault": true,
+        "width": 6,
+        "height": 4,
+        "className": "",
+        "interpolation": "linear",
+        "x": 830,
+        "y": 140,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "alerta_texto",
+        "type": "ui-text",
+        "z": "803e46c0722e018f",
+        "group": "c92eb03e21b57652",
+        "order": 3,
+        "width": 6,
+        "height": 1,
+        "name": "Alerta Incêndio",
+        "label": "Status",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "x": 820,
+        "y": 200,
+        "wires": []
+    },
+    {
+        "id": "formatar_dashboard",
+        "type": "function",
+        "z": "803e46c0722e018f",
+        "name": "Formatar Dashboard",
+        "func": "let dados = JSON.parse(msg.payload);\n\n// saída 1 -> temperatura\nlet tempMsg = {\n    payload: dados.temperatura\n};\n\n// saída 2 -> estado\nlet estadoMsg = {\n    payload: dados.roomState\n};\n\n// saída 3 -> alerta texto\nlet alertaMsg = {\n    payload: dados.roomState === 2 ? \"🔥 INCÊNDIO DETECTADO\" : \"OK\"\n};\n\nreturn [tempMsg, estadoMsg, alertaMsg];",
+        "outputs": 3,
+        "x": 500,
+        "y": 140,
+        "wires": [
+            [
+                "chart_temp"
+            ],
+            [
+                "chart_estado"
+            ],
+            [
+                "alerta_texto"
+            ]
+        ]
+    },
+    {
+        "id": "c125df1dac68232e",
+        "type": "mqtt in",
+        "z": "803e46c0722e018f",
+        "name": "Dados",
+        "topic": "status",
+        "qos": "2",
+        "datatype": "auto-detect",
+        "broker": "",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 170,
+        "y": 140,
+        "wires": [
+            [
+                "formatar_dashboard"
+            ]
+        ]
+    },
+    {
+        "id": "45c1db72d9f62c3c",
+        "type": "global-config",
+        "env": [],
+        "modules": {
+            "@flowfuse/node-red-dashboard": "1.30.2"
+        }
+    }
+]
