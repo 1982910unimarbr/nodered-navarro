@@ -1,5 +1,13 @@
 [
     {
+        "id": "c866516c27872654",
+        "type": "tab",
+        "label": "Fluxo 1",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
         "id": "b6ec9e4fcfb73207",
         "type": "tab",
         "label": "Controle",
@@ -24,6 +32,46 @@
         "env": []
     },
     {
+        "id": "d76b367d0b1265f7",
+        "type": "tab",
+        "label": "Fluxo 2",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "f9f32e81928b6391",
+        "type": "mqtt-broker",
+        "name": "HiveMQ",
+        "broker": "8498a3d2c00c4a09bdffbdeaa399f6de.s1.eu.hivemq.cloud",
+        "port": "8883",
+        "tls": "9cbf9641ec2a8211",
+        "clientid": "",
+        "autoConnect": true,
+        "usetls": true,
+        "protocolVersion": 4,
+        "keepalive": 60,
+        "cleansession": true,
+        "autoUnsubscribe": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthRetain": "false",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closeRetain": "false",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willRetain": "false",
+        "willPayload": "",
+        "willMsg": {},
+        "userProps": "",
+        "sessionExpiry": ""
+    },
+    {
         "id": "1006fe7d5b57017a",
         "type": "ui-base",
         "name": "My Dashboard",
@@ -42,25 +90,6 @@
         "notificationDisplayTime": 1,
         "showDisconnectNotification": true,
         "allowInstall": false
-    },
-    {
-        "id": "24cb333788d40170",
-        "type": "ui-theme",
-        "name": "Default Theme",
-        "colors": {
-            "surface": "#ffffff",
-            "primary": "#0094CE",
-            "bgPage": "#eeeeee",
-            "groupBg": "#ffffff",
-            "groupOutline": "#cccccc"
-        },
-        "sizes": {
-            "density": "default",
-            "pagePadding": "12px",
-            "groupGap": "12px",
-            "groupBorderRadius": "4px",
-            "widgetGap": "12px"
-        }
     },
     {
         "id": "62992caeb995f3aa",
@@ -111,6 +140,39 @@
         "visible": true,
         "disabled": false,
         "groupType": "default"
+    },
+    {
+        "id": "24cb333788d40170",
+        "type": "ui-theme",
+        "name": "Default Theme",
+        "colors": {
+            "surface": "#ffffff",
+            "primary": "#0094CE",
+            "bgPage": "#eeeeee",
+            "groupBg": "#ffffff",
+            "groupOutline": "#cccccc"
+        },
+        "sizes": {
+            "density": "default",
+            "pagePadding": "12px",
+            "groupGap": "12px",
+            "groupBorderRadius": "4px",
+            "widgetGap": "12px"
+        }
+    },
+    {
+        "id": "9cbf9641ec2a8211",
+        "type": "tls-config",
+        "name": "",
+        "cert": "",
+        "key": "",
+        "ca": "",
+        "certname": "",
+        "keyname": "",
+        "caname": "",
+        "servername": "",
+        "verifyservercert": true,
+        "alpnprotocol": ""
     },
     {
         "id": "032ce5adddc01a71",
@@ -186,12 +248,13 @@
         "name": "",
         "topic": "temperatura",
         "qos": "2",
-        "datatype": "auto-detect",
+        "datatype": "utf8",
+        "broker": "f9f32e81928b6391",
         "nl": false,
         "rap": true,
         "rh": 0,
         "inputs": 0,
-        "x": 150,
+        "x": 170,
         "y": 60,
         "wires": [
             [
@@ -284,7 +347,7 @@
         "userProps": "",
         "correl": "",
         "expiry": "",
-        "broker": "",
+        "broker": "f9f32e81928b6391",
         "x": 1120,
         "y": 160,
         "wires": []
@@ -302,7 +365,7 @@
         "userProps": "",
         "correl": "",
         "expiry": "",
-        "broker": "",
+        "broker": "f9f32e81928b6391",
         "x": 1100,
         "y": 400,
         "wires": []
@@ -340,9 +403,72 @@
         "userProps": "",
         "correl": "",
         "expiry": "",
-        "broker": "",
+        "broker": "f9f32e81928b6391",
         "x": 1700,
         "y": 100,
+        "wires": []
+    },
+    {
+        "id": "formatar_dashboard",
+        "type": "function",
+        "z": "803e46c0722e018f",
+        "name": "Formatar Dashboard",
+        "func": "let dados = JSON.parse(msg.payload);\n\n// saída 1 -> temperatura\nlet tempMsg = {\n    payload: dados.temperatura\n};\n\n// saída 2 -> estado\nlet estadoMsg = {\n    payload: dados.roomState\n};\n\n// saída 3 -> alerta texto\nlet alertaMsg = {\n    payload: dados.roomState === 2 ? \"🔥 INCÊNDIO DETECTADO\" : \"OK\"\n};\n\nreturn [tempMsg, estadoMsg, alertaMsg];",
+        "outputs": 3,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 500,
+        "y": 140,
+        "wires": [
+            [
+                "chart_temp"
+            ],
+            [
+                "chart_estado"
+            ],
+            [
+                "alerta_texto"
+            ]
+        ]
+    },
+    {
+        "id": "c125df1dac68232e",
+        "type": "mqtt in",
+        "z": "803e46c0722e018f",
+        "name": "Dados",
+        "topic": "status",
+        "qos": "2",
+        "datatype": "utf8",
+        "broker": "f9f32e81928b6391",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 170,
+        "y": 140,
+        "wires": [
+            [
+                "formatar_dashboard"
+            ]
+        ]
+    },
+    {
+        "id": "alerta_texto",
+        "type": "ui-text",
+        "z": "803e46c0722e018f",
+        "group": "c92eb03e21b57652",
+        "order": 3,
+        "width": 6,
+        "height": 1,
+        "name": "Alerta Incêndio",
+        "label": "Status",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "x": 820,
+        "y": 200,
         "wires": []
     },
     {
@@ -466,65 +592,7 @@
         ]
     },
     {
-        "id": "alerta_texto",
-        "type": "ui-text",
-        "z": "803e46c0722e018f",
-        "group": "c92eb03e21b57652",
-        "order": 3,
-        "width": 6,
-        "height": 1,
-        "name": "Alerta Incêndio",
-        "label": "Status",
-        "format": "{{msg.payload}}",
-        "layout": "row-spread",
-        "x": 820,
-        "y": 200,
-        "wires": []
-    },
-    {
-        "id": "formatar_dashboard",
-        "type": "function",
-        "z": "803e46c0722e018f",
-        "name": "Formatar Dashboard",
-        "func": "let dados = JSON.parse(msg.payload);\n\n// saída 1 -> temperatura\nlet tempMsg = {\n    payload: dados.temperatura\n};\n\n// saída 2 -> estado\nlet estadoMsg = {\n    payload: dados.roomState\n};\n\n// saída 3 -> alerta texto\nlet alertaMsg = {\n    payload: dados.roomState === 2 ? \"🔥 INCÊNDIO DETECTADO\" : \"OK\"\n};\n\nreturn [tempMsg, estadoMsg, alertaMsg];",
-        "outputs": 3,
-        "x": 500,
-        "y": 140,
-        "wires": [
-            [
-                "chart_temp"
-            ],
-            [
-                "chart_estado"
-            ],
-            [
-                "alerta_texto"
-            ]
-        ]
-    },
-    {
-        "id": "c125df1dac68232e",
-        "type": "mqtt in",
-        "z": "803e46c0722e018f",
-        "name": "Dados",
-        "topic": "status",
-        "qos": "2",
-        "datatype": "auto-detect",
-        "broker": "",
-        "nl": false,
-        "rap": true,
-        "rh": 0,
-        "inputs": 0,
-        "x": 170,
-        "y": 140,
-        "wires": [
-            [
-                "formatar_dashboard"
-            ]
-        ]
-    },
-    {
-        "id": "45c1db72d9f62c3c",
+        "id": "df215e33b72acff3",
         "type": "global-config",
         "env": [],
         "modules": {
